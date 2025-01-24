@@ -7,7 +7,7 @@
 - [Prerequisites](#prerequisites)
 - [How to](#how-to)
   - [Setup](#setup)
-    - [Prepare `includes/secrets.h`](#prepare-includessecretsh)
+    - [Prepare `includes/secrets.hpp`](#prepare-includessecretshpp)
   - [Develop](#develop)
   - [Upload](#upload)
   - [Monitor](#monitor)
@@ -28,9 +28,9 @@
 
 ### Setup
 
-#### Prepare `includes/secrets.h`
+#### Prepare `includes/secrets.hpp`
 
-Copy from `includes/secrets_template.h` to set your secret values.
+Copy from `includes/secrets_template.hpp` to set your secret values.
 
 ### Develop
 

@@ -13,13 +13,14 @@ static int32_t display_width = 0;
 static int32_t display_height = 0;
 static int32_t display_padding_x = 0;
 static int32_t display_padding_y = 5;
+const static uint8_t DISPLAY_BRIGHTNESS = 16;
 
-const static int LIGHT_UNIT_DIGITAL_PIN = 32;
-const static int LIGHT_UNIT_ANALOG_PIN = 33;
-const static int LIGHT_SENSOR_THRESHOLD = 3000;
+const static uint8_t LIGHT_UNIT_DIGITAL_PIN = 32;
+const static uint8_t LIGHT_UNIT_ANALOG_PIN = 33;
+const static uint16_t LIGHT_SENSOR_THRESHOLD = 3000;
 
-const static int BATTERY_BAR_HEIGHT = 10;
-static int battery_level = 0;
+const static int32_t BATTERY_BAR_HEIGHT = 10;
+static int32_t battery_level = 0;
 
 const static char *BOT_SERVICE_UUID = "cba20d00-224d-11e6-9fb8-0002a5d5c51b";
 const static char *BOT_CHARACTERISTIC_UUID = "cba20002-224d-11e6-9fb8-0002a5d5c51b";
@@ -75,7 +76,7 @@ void log(esp_log_level_t level, const char *format, ...)
 
 void updateBatteryLevelDisplay()
 {
-  if (battery_level != M5.Power.getBatteryLevel())
+  if (2 < abs(M5.Power.getBatteryLevel() - battery_level))
   {
     battery_level = M5.Power.getBatteryLevel();
     log(ESP_LOG_VERBOSE, "Battery: %d%%", battery_level);
@@ -149,7 +150,7 @@ void setup()
   display_width = M5.Display.width();
   display_height = M5.Display.height();
   M5.Display.setTextWrap(true, true);
-  M5.Display.setBrightness(32);
+  M5.Display.setBrightness(DISPLAY_BRIGHTNESS);
 
   log(ESP_LOG_INFO, "Connecting to WiFi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);

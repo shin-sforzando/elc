@@ -34,7 +34,7 @@ Copy from `includes/secrets_template.hpp` to set your secret values.
 
 ### Develop
 
-(T. B. D.)
+`pio run` to build the project.
 
 ### Upload
 
@@ -46,7 +46,13 @@ Copy from `includes/secrets_template.hpp` to set your secret values.
 
 ### Print Enclosure
 
-(T. B. D.)
+You can print the enclosure for your device using a 3D printer. The STL files are located in the `./enclosure` directory. Use your preferred 3D printing software to print the parts.
+
+The following models for intercom are available at this time.
+
+- [AIPHONE GBM-2MS](https://www.aiphone.co.jp/products/complex/system/patmoa/feature/feature_1.html)
+
+![GBM-2MS](./enclosure/Switchbot%20Mounter%20for%20GBM-2MS%20v11.png)
 
 ## Misc
 

@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 - [Prerequisites](#prerequisites)
+  - [Hardware](#hardware)
+  - [Software](#software)
 - [How to](#how-to)
   - [Setup](#setup)
     - [Prepare `includes/secrets.hpp`](#prepare-includessecretshpp)
@@ -12,6 +14,8 @@
   - [Upload](#upload)
   - [Monitor](#monitor)
   - [Print Enclosure](#print-enclosure)
+- [Common Issues](#common-issues)
+  - [Battery](#battery)
 - [Misc](#misc)
   - [Note](#note)
   - [LICENSE](#license)
@@ -19,10 +23,18 @@
 
 ## Prerequisites
 
+### Hardware
+
 - [M5StickC Plus 2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2)
 - [M5Stack Unit Light](https://docs.m5stack.com/en/unit/LIGHT)
 - [SwitchBot Bot](https://www.switchbot.jp/products/switchbot-bot)
   - For Bot BLE API info, see [OpenWonderLabs/SwitchBotAPI-BLE](https://github.com/OpenWonderLabs/SwitchBotAPI-BLE/blob/latest/devicetypes/bot.md)
+
+### Software
+
+- [platform.io](https://platformio.org)
+- [M5Unified](https://github.com/m5stack/M5Unified) (Version 0.2.2)
+- [h2zero/NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) (Version 2.2.1)
 
 ## How to
 
@@ -46,13 +58,20 @@ Copy from `includes/secrets_template.hpp` to set your secret values.
 
 ### Print Enclosure
 
-You can print the enclosure for your device using a 3D printer. The STL files are located in the `./enclosure` directory. Use your preferred 3D printing software to print the parts.
+The STL files are located in the `./enclosure`.
+Use your preferred 3D printing software to print the parts.
 
 The following models for intercom are available at this time.
 
 - [AIPHONE GBM-2MS](https://www.aiphone.co.jp/products/complex/system/patmoa/feature/feature_1.html)
 
-![GBM-2MS](./enclosure/Switchbot%20Mounter%20for%20GBM-2MS%20v11.png)
+![AIPHONE GBM-2MS](./enclosure/Switchbot%20Mounter%20for%20GBM-2MS%20v11.png)
+
+## Common Issues
+
+### Battery
+
+- M5Stick C Plus 2 (with a built-in `200 mAh` battery) will only run continuously for about 4 hours.
 
 ## Misc
 

@@ -101,14 +101,7 @@ void updateBatteryLevelDisplay()
 void syncWithNTP()
 {
   configTime(9 * 3600, 0, "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
-  if (getLocalTime(&timeinfo))
-  {
-    log(ESP_LOG_INFO, "Time synchronized with NTP");
-  }
-  else
-  {
-    log(ESP_LOG_ERROR, "Failed to synchronize time");
-  }
+  getLocalTime(&timeinfo) ? log(ESP_LOG_INFO, "Time synchronized with NTP") : log(ESP_LOG_ERROR, "Failed to synchronize time");
 }
 
 void executeBot()
@@ -172,6 +165,7 @@ void loop()
   uint16_t light_value = analogRead(LIGHT_UNIT_ANALOG_PIN);
   if (light_value < 4095)
   {
+    // If it's not pitch dark, log the light value.
     log(ESP_LOG_VERBOSE, "Light: %d", light_value);
   }
   if (light_value < LIGHT_SENSOR_THRESHOLD)

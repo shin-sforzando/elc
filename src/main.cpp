@@ -6,8 +6,13 @@
 #include "secrets.hpp"
 
 const static uint32_t LOOP_INTERVAL_MS = 1 * 1000;
+const static int CPU_FREQ_MHZ = 80;
 
 struct tm timeinfo;
+const int TIMEZONE_OFFSET = 9 * 3600;
+const int DAYLIGHT_OFFSET = 0;
+const char *NTP_SERVER_1 = "ntp.nict.jp";
+const char *NTP_SERVER_2 = "ntp.jst.mfeed.ad.jp";
 
 static int32_t display_width = 0;
 static int32_t display_height = 0;
@@ -18,14 +23,20 @@ const static uint8_t DISPLAY_BRIGHTNESS = 16;
 const static uint8_t LIGHT_UNIT_DIGITAL_PIN = 32;
 const static uint8_t LIGHT_UNIT_ANALOG_PIN = 33;
 const static uint16_t LIGHT_SENSOR_THRESHOLD = 3000;
+const static uint16_t DARK_THRESHOLD = 4000;
 
+const static uint32_t BATTERY_CHECK_INTERVAL_MS = 10 * 1000;
 const static int32_t BATTERY_BAR_HEIGHT = 10;
 static int32_t battery_level = 0;
+static unsigned long last_battery_checked = 0;
 
 const static char *BOT_SERVICE_UUID = "cba20d00-224d-11e6-9fb8-0002a5d5c51b";
 const static char *BOT_CHARACTERISTIC_UUID = "cba20002-224d-11e6-9fb8-0002a5d5c51b";
 const static uint8_t BOT_COMMAND[3] = {0x57, 0x01, 0x00};
 
+/**
+ * @brief Log with timestamp.
+ */
 void log(esp_log_level_t level, const char *format, ...)
 {
   char timeStr[9] = {'0', '0', ':', '0', '0', ':', '0', '0', '\0'};
@@ -74,11 +85,27 @@ void log(esp_log_level_t level, const char *format, ...)
   M5.Display.printf("%s %s\n", timeStr, message);
 }
 
-void updateBatteryLevelDisplay()
+/**
+ * @brief Change CPU frequency.
+ */
+void changeCpuFrequency(int frequency_mhz)
 {
-  if (2 < abs(M5.Power.getBatteryLevel() - battery_level))
+  Serial.flush();
+  Serial.end();
+  setCpuFrequencyMhz(frequency_mhz);
+  Serial.begin(115200);
+  log(ESP_LOG_INFO, "CPU: %d MHz", getCpuFrequencyMhz());
+}
+
+/**
+ * @brief Check battery level and display battery bar.
+ */
+void checkBatteryLevel()
+{
+  int current_battery_level = M5.Power.getBatteryLevel();
+  if (2 < abs(current_battery_level - battery_level))
   {
-    battery_level = M5.Power.getBatteryLevel();
+    battery_level = current_battery_level;
     log(ESP_LOG_VERBOSE, "Battery: %d%%", battery_level);
     int bar_color = 0;
     switch (battery_level)
@@ -98,12 +125,36 @@ void updateBatteryLevelDisplay()
   }
 }
 
+/**
+ * @brief Synchronize time with NTP server.
+ */
 void syncWithNTP()
 {
-  configTime(9 * 3600, 0, "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
+  configTime(TIMEZONE_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER_1, NTP_SERVER_2);
   getLocalTime(&timeinfo) ? log(ESP_LOG_INFO, "Time synchronized with NTP") : log(ESP_LOG_ERROR, "Failed to synchronize time");
 }
 
+/**
+ * @brief Read light sensor.
+ */
+bool readLightSensor()
+{
+  uint16_t light_value = analogRead(LIGHT_UNIT_ANALOG_PIN);
+  if (light_value < DARK_THRESHOLD)
+  {
+    // If it's pitch dark.
+    log(ESP_LOG_VERBOSE, "Light: %d", light_value);
+  }
+  if (light_value < LIGHT_SENSOR_THRESHOLD)
+  {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @brief Execute Bot using BLE.
+ */
 void executeBot()
 {
   NimBLEDevice::init("elc");
@@ -129,6 +180,9 @@ void executeBot()
   }
 }
 
+/**
+ * @brief Setup.
+ */
 void setup()
 {
   auto cfg = M5.config();
@@ -155,20 +209,18 @@ void setup()
   syncWithNTP();
   WiFi.disconnect(true);
 
-  setCpuFrequencyMhz(80);
+  changeCpuFrequency(CPU_FREQ_MHZ);
+  log(ESP_LOG_INFO, "Setup completed");
 }
 
+/**
+ * @brief Loop.
+ */
 void loop()
 {
   M5.update();
 
-  uint16_t light_value = analogRead(LIGHT_UNIT_ANALOG_PIN);
-  if (light_value < 4095)
-  {
-    // If it's not pitch dark, log the light value.
-    log(ESP_LOG_VERBOSE, "Light: %d", light_value);
-  }
-  if (light_value < LIGHT_SENSOR_THRESHOLD)
+  if (readLightSensor())
   {
     log(ESP_LOG_INFO, "Light is detected");
     executeBot();
@@ -180,7 +232,11 @@ void loop()
     executeBot();
   }
 
-  updateBatteryLevelDisplay();
+  if (BATTERY_CHECK_INTERVAL_MS < millis() - last_battery_checked)
+  {
+    last_battery_checked = millis();
+    checkBatteryLevel();
+  }
 
   M5.delay(LOOP_INTERVAL_MS);
 }
